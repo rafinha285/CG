@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "GraphicsFrame.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -19,5 +21,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    GraphicsFrame *graphicsFrame;
 };
 #endif // MAINWINDOW_H

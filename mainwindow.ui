@@ -17,10 +17,10 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>100</y>
-      <width>120</width>
-      <height>80</height>
+      <x>-80</x>
+      <y>-40</y>
+      <width>881</width>
+      <height>611</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -29,19 +29,6 @@
     <property name="frameShadow">
      <enum>QFrame::Shadow::Raised</enum>
     </property>
-    <widget class="QPushButton" name="pushButton">
-     <property name="geometry">
-      <rect>
-       <x>-10</x>
-       <y>30</y>
-       <width>84</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>PushButton</string>
-     </property>
-    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

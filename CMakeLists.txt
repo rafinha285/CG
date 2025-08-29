@@ -20,6 +20,10 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         ${TS_FILES}
+        Shape.cpp
+        Shape.h
+        GraphicsFrame.cpp
+        GraphicsFrame.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
