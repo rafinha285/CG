@@ -39,5 +39,18 @@ private:
     Point p;
 };
 
+class LineClass: public Shape
+{
+public:
+    LineClass(const Point& p1, const Point& p2, const Color& c): p1(p1), p2(p2) {color=c;}
+    void draw(QPainter& painter) const override
+    {
+        painter.setPen(QPen(QColor(color.r,color.g,color.b),2));
+        painter.drawLine(QPoint(p1.x,p1.y),QPoint(p2.x,p2.y));
+    }
+
+private:
+    Point p1,p2;
+};
 
 #endif //CG_SHAPE_H
