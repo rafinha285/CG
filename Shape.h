@@ -9,6 +9,12 @@
 
 constexpr double PI = 3.14;
 
+struct PointSimple
+{
+    int x;
+    int y;
+};
+
 class Vector2D
 {
 public:
@@ -19,13 +25,13 @@ public:
         coords[1] = 0.0;
         coords[2] = 1.0;
     }
-    Vector2D(double x, double y)
+    Vector2D(const int x,const int y)
     {
         coords[0] = x;
         coords[1] = y;
         coords[2] = 1.0;
     }
-    double coords[3];
+    int coords[3];
 };
 
 class Matrix3x3
@@ -56,20 +62,18 @@ public:
         return result;
     }
 
-    static Matrix3x3 createRotationMatrix(double angleDegrees)
+    static Matrix3x3 createRotationMatrix(const double angleDegrees)
     {
         Matrix3x3 rotMatrix;
-        double angleRad = angleDegrees * PI / 180.0;
-        // CORREÇÃO 2: Use double para os cálculos trigonométricos!
-        double c = cos(angleRad);
-        double s = sin(angleRad);
+        const double angleRad = angleDegrees * PI / 180.0;
+        const double c = cos(angleRad);
+        const double s = sin(angleRad);
 
         rotMatrix.m[0][0] = c;
         rotMatrix.m[0][1] = -s;
         rotMatrix.m[1][0] = s;
         rotMatrix.m[1][1] = c;
 
-        // Zera os outros campos para ser uma matriz de identidade nos outros eixos
         rotMatrix.m[0][2] = 0.0;
         rotMatrix.m[1][2] = 0.0;
         rotMatrix.m[2][0] = 0.0;
@@ -108,21 +112,27 @@ public:
     virtual ~Shape() = default;
     virtual void draw(QPainter &painter) const = 0;
 
-    // CORREÇÃO 3: Funções virtuais precisam de um corpo (mesmo que vazio).
     virtual void translate(double tx, double ty) {}
     virtual void scale(double sx, double sy) {}
     virtual void rotate(double angle) {}
 
+    void setColor(const Color color)
+    {
+        this->color = color;
+    }
+
 protected:
-    Color color;
+    Color color{};
 };
 
-class Point : public Shape
+class Point final : public Shape
 {
 public:
     Vector2D vector;
 
-    Point(double x = 0, double y = 0, Color c = {0,0,0})
+    Point(PointSimple point) : vector(point.x, point.y){};
+
+    Point(const double x = 0, const double y = 0, const Color c = {0,0,0})
     {
         this->color = c;
         this->vector = Vector2D(x, y);
@@ -158,44 +168,141 @@ public:
     };
 };
 
-class Line : public Shape
+class Line final : public Shape
 {
 public:
-    Line(Point p1, Point p2) : p1(p1), p2(p2){};
+    Line(Point& p1, Point& p2) : p1(p1), p2(p2){};
     Line(double x1, double y1, double x2, double y2, Color color) : p1(x1, y1, color), p2(x2, y2, color)
     {
        this->color = color;
+    }
+
+    PointSimple calculateMiddle()
+    {
+        return {
+            (this->p1.vector.coords[0] + this->p2.vector.coords[0]) / 2,
+            (this->p1.vector.coords[1] + this->p2.vector.coords[1]) / 2
+        };
     }
 
     void draw(QPainter &painter) const override
     {
         painter.setPen(QPen(QColor(p1.getColor().r, p1.getColor().g, p1.getColor().b), 2));
         painter.drawLine(
-            QPoint(static_cast<int>(p1.vector.coords[0]), static_cast<int>(p1.vector.coords[1])),
-            QPoint(static_cast<int>(p2.vector.coords[0]), static_cast<int>(p2.vector.coords[1]))
+            QPoint(p1.vector.coords[0],p1.vector.coords[1]),
+            QPoint(p2.vector.coords[0],p2.vector.coords[1])
         );
     }
 
-    void translate(double tx, double ty) override
+    void translate(const double tx, const double ty) override
     {
         this->p1.translate(tx, ty);
         this->p2.translate(tx, ty);
     }
 
-    void scale(double sx, double sy) override
+    void scale(const double sx,const double sy) override
     {
         this->p1.scale(sx, sy);
         this->p2.scale(sx, sy);
     }
 
-    void rotate(double angle) override
+    void rotate(const double angle) override
     {
         this->p1.rotate(angle);
         this->p2.rotate(angle);
     }
 
+    Point getP1()
+    {
+        return this->p1;
+    }
+    Point getP2()
+    {
+        return this->p2;
+    }
+
 private:
     Point p1, p2;
+};
+
+class Polygon final : public Shape
+{
+public:
+    Polygon()
+    {
+        this->lines = std::vector<Line>();
+    }
+
+    void draw(QPainter& painter) const override
+    {
+        for (int i = 0; i < this->lines.size(); i++)
+        {
+            lines.at(i).draw(painter);
+        }
+    };
+
+    void addLine(const Line &line)
+    {
+        this->lines.push_back(line);
+    }
+    void addLines(const std::vector<Line> &lines)
+    {
+        for (const auto & line : lines)
+        {
+            this->addLine(line);
+        }
+    }
+
+    PointSimple calculateMiddle()
+    {
+        int sumX = 0, sumY = 0;
+        for (auto & line : this->lines)
+        {
+            PointSimple point = line.calculateMiddle();
+            sumX += + point.x;
+            sumY += + point.y;
+        }
+        return {static_cast<int>(sumX/lines.size()), static_cast<int>(sumY/lines.size())};
+    }
+
+    void translateToOrigin()
+    {
+        PointSimple middle = this->calculateMiddle();
+        qDebug("%d %d",middle.x, middle.y);
+        this->translate(-middle.x,-middle.y);
+    }
+
+    void translate(const double tx,const double ty) override
+    {
+        for (auto & line : this->lines)
+        {
+            line.translate(tx, ty);
+        }
+    }
+
+    void scale(const double sx,const double sy) override
+    {
+        PointSimple temp = this->calculateMiddle();
+        this->translateToOrigin();
+        for (auto & line : this->lines)
+        {
+            line.scale(sx, sy);
+        }
+        this->translate(temp.x, temp.y);
+    }
+
+    void rotate(double angle) override
+    {
+        PointSimple temp = this->calculateMiddle();
+        this->translateToOrigin();
+        for (auto & line : this->lines)
+        {
+            line.rotate(angle);
+        }
+        this->translate(temp.x, temp.y);
+    }
+private:
+    std::vector<Line> lines;
 };
 
 #endif //CG_SHAPE_H
