@@ -25,14 +25,14 @@ void GraphicsFrame::paintEvent(QPaintEvent *event)
 
     Window myWindow(-400, -400, 400, 400);
     Viewport myViewport(0, 0, width(), height());
+    //
+    // double quadradoX = -200;
+    // double quadradoY = -200;
+    // double lado = 200;
+    // Color corVermelha = {255, 0, 0};
 
-    double quadradoX = -200;
-    double quadradoY = -200;
-    double lado = 200;
-    Color corVermelha = {255, 0, 0};
-
-    Square square(quadradoX, quadradoY, lado, corVermelha);
-    addShape(std::make_unique<Square>(square));
+    // Square square(quadradoX, quadradoY, lado, corVermelha);
+    // addShape(std::make_unique<Square>(square));
 
     Matrix3x3 viewportMatrix = Matrix3x3::createViewportMatrix(myWindow, myViewport);
     // painter.setRenderHint(QPainter::Antialiasing);
@@ -41,7 +41,7 @@ void GraphicsFrame::paintEvent(QPaintEvent *event)
     {
         if (shape)
         {
-            shape->draw(painter, viewportMatrix);
+            shape->draw(painter, viewportMatrix, &myWindow);
         }
     }
 }
