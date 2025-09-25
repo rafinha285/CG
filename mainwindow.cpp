@@ -11,21 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
     graphicsFrame = new GraphicsFrame(this);
     setCentralWidget(graphicsFrame);
 
-    // this->graphicsFrame->addShape(
-    //     std::make_unique<PointClass>(
-    //         Point{100,100},
-    //         Color{255,255,255}
-    //     )
-    // );
-    //
-    // this->graphicsFrame->addShape(
-    //     std::make_unique<LineClass>(
-    //         Point{120,120},
-    //         Point{200,200},
-    //         Color{255,255,0}
-    //     )
-    // );
-
     auto white = Color{255, 255, 255};
 
     Point p1{0,0,white},p2{0,100,white},p3{100,100,white},p4{100, 0,white};
@@ -35,31 +20,16 @@ MainWindow::MainWindow(QWidget *parent)
     auto *quadrado = new Polygon();
 
     quadrado->addLines(std::vector{line1,line2,line3,line4});
-
+    // quadrado->scale(1.3333,1.3333);
+    // quadrado->rotate(260);
+    Point simple2 = quadrado->calculateMiddle();
+    // simple2.setColor({0,255,255});
+    // this->graphicsFrame->addShape(
+    //     std::make_unique<Point>(simple2)
+    // );
     // this->graphicsFrame->addShape(
     //     std::make_unique<Polygon>(*quadrado)
     // );
-
-    // quadrado->scale(10,10);
-    Point simple = quadrado->calculateMiddle();
-    simple.setColor({0,255,255});
-    // quadrado->translateToOrigin();
-    this->graphicsFrame->addShape(
-        std::make_unique<Point>(simple)
-    );
-    this->graphicsFrame->addShape(
-        std::make_unique<Polygon>(*quadrado)
-    );
-    // quadrado->scale(2,2);
-    quadrado->scale(1.2,1.2);
-    Point simple2 = quadrado->calculateMiddle();
-    simple2.setColor({0,255,255});
-    this->graphicsFrame->addShape(
-        std::make_unique<Point>(simple2)
-    );
-    this->graphicsFrame->addShape(
-        std::make_unique<Polygon>(*quadrado)
-    );
     // free(quadrado);
 }
 
