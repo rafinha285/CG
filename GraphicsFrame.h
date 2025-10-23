@@ -6,7 +6,7 @@
 #define CG_GRAPHICSFRAME_H
 #include <QFrame>
 
-#include "Shape.h"
+#include "src/shapes/Shape.h"
 
 
 class GraphicsFrame : public QFrame

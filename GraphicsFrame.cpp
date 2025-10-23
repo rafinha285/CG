@@ -3,7 +3,8 @@
 //
 
 #include "GraphicsFrame.h"
-#include "Shape.h"
+#include "aShape.h"
+#include "src/shapes/Square.h"
 
 GraphicsFrame::GraphicsFrame(QWidget *parent)
     : QFrame(parent)
@@ -23,16 +24,17 @@ void GraphicsFrame::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    Window myWindow(-400, -400, 400, 400);
-    Viewport myViewport(0, 0, width(), height());
-    //
-    // double quadradoX = -200;
-    // double quadradoY = -200;
-    // double lado = 200;
-    // Color corVermelha = {255, 0, 0};
+    Window myWindow(0, 0, 200, 200);
+    Viewport myViewport(0, 0, width(), width());
 
-    // Square square(quadradoX, quadradoY, lado, corVermelha);
-    // addShape(std::make_unique<Square>(square));
+    int margin = 0;
+
+    double x_min = myWindow.min.x() + margin; // -350.0
+    double y_min = myWindow.min.y() + margin; // -350.0
+    double side = (myWindow.max.x() - myWindow.min.x()) - (2.0 * margin); // 700.0
+
+    Square mySquare((int)x_min, (int)y_min, (int)side, {255,255,255});
+    addShape(std::make_unique<Square>(mySquare));
 
     Matrix3x3 viewportMatrix = Matrix3x3::createViewportMatrix(myWindow, myViewport);
     // painter.setRenderHint(QPainter::Antialiasing);
