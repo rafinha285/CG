@@ -24,8 +24,6 @@ public:
         clipAndDraw(painter,viewportTransform,window);
     };
 
-
-
     virtual void translate(double tx, double ty) {}
     virtual void scale(double sx, double sy) {}
     virtual void rotate(double angle, const Vector2D& center) {}

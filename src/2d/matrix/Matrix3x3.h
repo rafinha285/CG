@@ -102,12 +102,12 @@ public:
 
         const Matrix3x3 T1 = createTranslationMatrix(tx,ty);
 
-        const double sx = (viewport.xmax - viewport.xmin) / (window.max.m_coords[0] - window.min.m_coords[0]);
-        const double sy = (viewport.ymax - viewport.ymin) / (window.max.m_coords[1] - window.min.m_coords[1]);
+        const double sx = (viewport.max.x() - viewport.min.x()) / (window.max.m_coords[0] - window.min.m_coords[0]);
+        const double sy = (viewport.max.y() - viewport.min.y()) / (window.max.m_coords[1] - window.min.m_coords[1]);
         const Matrix3x3 S = createScaleMatrix(sx, sy);
 
-        const double tx2 = viewport.xmin;
-        const double ty2 = viewport.ymin;
+        const double tx2 = viewport.min.x();
+        const double ty2 = viewport.min.y();
         const Matrix3x3 T2 = createTranslationMatrix(tx2, ty2);
 
         const Matrix3x3 temp = T2 * S;

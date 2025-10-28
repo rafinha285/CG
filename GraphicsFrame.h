@@ -6,7 +6,8 @@
 #define CG_GRAPHICSFRAME_H
 #include <QFrame>
 
-#include "src/shapes/Shape.h"
+#include "src/2d/shapes/Shape.h"
+#include "src/3d/shapes/Shape3D.h"
 
 
 class GraphicsFrame : public QFrame
@@ -15,12 +16,15 @@ class GraphicsFrame : public QFrame
 
     public:
         explicit GraphicsFrame(QWidget *parent = nullptr);
-        void addShape(std::unique_ptr<::Shape> shape);
+        void addShape(std::unique_ptr<::Shape3D> shape);
+        void startAnimation();
 
     protected:
         void paintEvent(QPaintEvent *event) override;
     private:
-        std::vector<std::unique_ptr<::Shape>> displayFile;
+        QTimer* m_timer;
+        double m_cameraAngle = 0.0;
+        std::vector<std::unique_ptr<::Shape3D>> displayFile;
 };
 
 

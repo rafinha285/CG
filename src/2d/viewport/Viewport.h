@@ -9,10 +9,14 @@
 class Viewport
 {
 public:
-    double xmin, ymin, xmax, ymax;
+    // double xmin, ymin, xmax, ymax;
+    Vector2D min,max;
 
     Viewport(double xmin, double ymin, double xmax, double ymax)
-        : xmin(xmin), ymin(ymin), xmax(xmax), ymax(ymax) {}
+    {
+        this->min = Vector2D(xmin, ymin);
+        this->max = Vector2D(xmax, ymax);
+    }
 };
 
 

@@ -13,7 +13,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
 set(TS_FILES CG_pt_BR.ts
-        src/window/Window.h)
+        src/2d/window/Window.h)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -25,20 +25,23 @@ set(PROJECT_SOURCES
 #        aShape.h
         GraphicsFrame.cpp
         GraphicsFrame.h
-        src/vector/Vector2D.h
-        src/window/Window.h
-        src/window/Window.h
-        src/viewport/Viewport.h
-        src/matrix/Matrix3x3.h
-        src/shapes/Shape.h
-        src/shapes/Shape.h
-        src/shapes/Shape.h
-        src/shapes/Shape.h
-        src/shapes/Shape.h
-        src/shapes/Point.h
-        src/shapes/Line.h
-        src/shapes/Square.h
-        src/shapes/Polygon.h
+        src/2d/vector/Vector2D.h
+        src/2d/window/Window.h
+        src/2d/window/Window.h
+        src/2d/viewport/Viewport.h
+        src/2d/matrix/Matrix3x3.h
+        src/2d/shapes/Shape.h
+        src/2d/shapes/Point.h
+        src/2d/shapes/Line.h
+        src/2d/shapes/Square.h
+        src/2d/shapes/Polygon.h
+        src/2d/window/Window.h
+        src/3d/matrix/Matrix4x4.h
+        src/3d/vector/Vector3D.h
+        src/3d/shapes/Shape3D.h
+        src/3d/shapes/Point3D.h
+        src/3d/window/Window3D.h
+        src/3d/shapes/Line3D.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
