@@ -19,6 +19,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void handleImport();
+    void handleExit();
+
 private:
     Ui::MainWindow *ui;
     GraphicsFrame *graphicsFrame;

@@ -42,6 +42,9 @@ set(PROJECT_SOURCES
         src/3d/shapes/Point3D.h
         src/3d/window/Window3D.h
         src/3d/shapes/Line3D.h
+        src/objreader/ObjLoader.h
+        src/3d/shapes/Polygon3D.h
+        src/objreader/ObjLoader.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

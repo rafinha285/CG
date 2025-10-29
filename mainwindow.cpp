@@ -5,6 +5,11 @@
 #include "src/2d/shapes/Square.h"
 #include "src/3d/shapes/Line3D.h"
 #include "src/3d/shapes/Point3D.h"
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QFile>
+
+#include "src/objreader/ObjLoader.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,72 +20,64 @@ MainWindow::MainWindow(QWidget *parent)
     graphicsFrame = new GraphicsFrame(this);
     setCentralWidget(graphicsFrame);
 
-    Color white = {255, 255, 255};
+    connect(ui->actionImport, &QAction::triggered, this, &MainWindow::handleImport);
 
-    // auto stickMan = Polygon();
+    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::handleExit);
+    // Color white = {255, 255, 255};
     //
-    // int x_centro = 100; // Centro do corpo
-    // int y_base_cabeca = 100; // Onde o pescoço encontra a cabeça
-    // int tam_cabeca = 20;
-    // int alt_pescoco = 10;
-    // int alt_tronco = 40;
-    // int alt_pernas = 30;
-    // int larg_bracos = 20;
+    // Point3D v0_bll(-100, -100, -100);
+    // Point3D v1_blr( 100, -100, -100); // Vértice 1: back-bottom-right
+    // Point3D v2_btr( 100,  100, -100); // Vértice 2: back-top-right
+    // Point3D v3_btl(-100,  100, -100); // Vértice 3: back-top-left
+    // Point3D v4_fll(-100, -100,  100); // Vértice 4: front-bottom-left (frente-baixo-esquerda)
+    // Point3D v5_flr( 100, -100,  100); // Vértice 5: front-bottom-right
+    // Point3D v6_ftr( 100,  100,  100); // Vértice 6: front-top-right
+    // Point3D v7_ftl(-100,  100,  100); // Vértice 7: front-top-left
     //
+    // // --- 2. Adicione as 12 arestas (linhas) ao graphicsFrame ---
     //
+    // // Face de trás (4 linhas)
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v0_bll, v1_blr, white));
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v1_blr, v2_btr, white));
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v2_btr, v3_btl, white));
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v3_btl, v0_bll, white));
     //
-    // // --- 1. Cabeça Quadrada ---
-    // // (x_centro - 10, y_base_cabeca) até (x_centro + 10, y_base_cabeca + 20)
-    // int cabeca_x_esq = x_centro - (tam_cabeca / 2);
-    // int cabeca_y_baixo = y_base_cabeca;
-    // int cabeca_x_dir = x_centro + (tam_cabeca / 2);
-    // int cabeca_y_cima = y_base_cabeca + tam_cabeca;
+    // // Face da frente (4 linhas)
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v4_fll, v5_flr, white));
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v5_flr, v6_ftr, white));
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v6_ftr, v7_ftl, white));
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v7_ftl, v4_fll, white));
     //
-    // // Linha de baixo da cabeça
-    // stickMan.addLine(Line(cabeca_x_esq, cabeca_y_baixo, cabeca_x_dir, cabeca_y_baixo, white));
-    // // Linha da direita
-    // stickMan.addLine(Line(cabeca_x_dir, cabeca_y_baixo, cabeca_x_dir, cabeca_y_cima, white));
-    // // Linha de cima
-    // stickMan.addLine(Line(cabeca_x_dir, cabeca_y_cima, cabeca_x_esq, cabeca_y_cima, white));
-    // // Linha da esquerda
-    // stickMan.addLine(Line(cabeca_x_esq, cabeca_y_cima, cabeca_x_esq, cabeca_y_baixo, white));
-    //
-    //
-    // // --- 2. Corpo (Pescoço e Tronco) ---
-    // int y_ombros = y_base_cabeca - alt_pescoco;
-    // int y_cintura = y_ombros - alt_tronco;
-    //
-    // // Pescoço (do centro da cabeça para baixo)
-    // stickMan.addLine(Line(x_centro, y_base_cabeca, x_centro, y_ombros, white));
-    // // Tronco (do pescoço para baixo)
-    // stickMan.addLine(Line(x_centro, y_ombros, x_centro, y_cintura, white));
-    //
-    //
-    // // --- 3. Braços ---
-    // // Saindo dos "ombros" (x_centro, y_ombros)
-    // stickMan.addLine(Line(x_centro, y_ombros, x_centro - larg_bracos, y_ombros - 10, white)); // Braço esquerdo
-    // stickMan.addLine(Line(x_centro, y_ombros, x_centro + larg_bracos, y_ombros - 10, white)); // Braço direito
-    //
-    //
-    // // --- 4. Pernas ---
-    // // Saindo da "cintura" (x_centro, y_cintura)
-    // int y_pes = y_cintura - alt_pernas;
-    // stickMan.addLine(Line(x_centro, y_cintura, x_centro - 15, y_pes, white)); // Perna esquerda
-    // stickMan.addLine(Line(x_centro, y_cintura, x_centro + 15, y_pes, white));
-    //
-    // stickMan.rotate(180);
+    // // Arestas que conectam as faces (4 linhas)
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v0_bll, v4_fll, white)); // Conecta back-left-bottom com front-left-bottom
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v1_blr, v5_flr, white)); // Conecta back-right-bottom com front-right-bottom
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v2_btr, v6_ftr, white)); // Conecta back-right-top com front-right-top
+    // graphicsFrame->addShape(std::make_unique<Line3D>(v3_btl, v7_ftl, white));
+}
 
-    // graphicsFrame->addShape(std::make_unique<Polygon>(stickMan));
+void MainWindow::handleExit()
+{
+    close();
+}
 
-    Point3D point = Point3D(0, 0, 0);
+void MainWindow::handleImport()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Importar arquivo"), QDir::homePath(), tr("Todos os Arquivos(*, *)"));
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::warning(this, tr("Erro"),
+            tr("Não foi possivel abrir o arquivo: %1").arg(file.errorString()));
+        return;
+    }
+    QTextStream in(&file);
 
-    Line3D line = Line3D(point, Point3D(200,200,200), white);
-    Line3D line2 = Line3D(point, Point3D(200,-300,-200), white);
-    Line3D line3 = Line3D(point, Point3D(-300,300,200), white);
+    ObjLoader::translateValues(&in, graphicsFrame);
 
-    graphicsFrame->addShape(std::make_unique<Line3D>(line));
-    graphicsFrame->addShape(std::make_unique<Line3D>(line2));
-    graphicsFrame->addShape(std::make_unique<Line3D>(line3));
+    file.close();
+
+
 }
 
 MainWindow::~MainWindow()

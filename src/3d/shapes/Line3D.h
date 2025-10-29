@@ -5,23 +5,23 @@
 #ifndef CG_LINE3D_H
 #define CG_LINE3D_H
 #include "Point3D.h"
+// #include "Polygon3D.h"
 #include "Shape3D.h"
 
 
-struct clippedPoints
-{
-    Point3D p1;
-    Point3D p2;
-};
-
 class Line3D: public Shape3D
-{   friend class Point3D;
+{
 
 public:
     Line3D(const Point3D& point1, const Point3D& point2, Color color): p1(point1), p2(point2)
     {
         this->color = color;
     };
+
+    Line3D(Point3D point1, Point3D point2): p1(point1), p2(point2)
+    {
+        this->color = {255,255,255};
+    }
 
     Vector3D calculateMiddle() const
     {
@@ -44,11 +44,33 @@ public:
         this->p2.scale(sx, sy, sz);
     }
 
-    // void rotate(const double angle, const Vector2D& center) override
-    // {
-    //     this->p1.rotate(angle, center);
-    //     this->p2.rotate(angle, center);
-    // }
+    void rotateX(double angle, const Vector3D& center) override
+    {
+        this->p1.rotateX(angle, center);
+        this->p2.rotateX(angle, center);
+    };
+
+    void rotateY(double angle, const Vector3D& center) override
+    {
+        this->p1.rotateY(angle, center);
+        this->p2.rotateY(angle, center);
+    }
+
+    void rotateZ(double angle, const Vector3D& center) override
+    {
+        this->p1.rotateZ(angle, center);
+        this->p2.rotateZ(angle, center);
+    }
+
+    Point3D getP1()
+    {
+        return p1;
+    }
+
+    Point3D getP2()
+    {
+        return p2;
+    }
 
 protected:
 

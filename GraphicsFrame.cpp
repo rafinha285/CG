@@ -40,16 +40,16 @@ void GraphicsFrame::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     Viewport myViewport(0, 0, width(), width());
 
-    Window3D myWorldWindow(-400, -400, -400, 400, 400, 400);
+    Window3D myWorldWindow(-10, -10, -10, 10, 10, 10);
 
-    double radius = 1000.0; // Distância da câmera
+    double radius = 1.0; // Distância da câmera
     double angleRad = m_cameraAngle * M_PI / 180.0;
 
     // Calcula a posição da câmera em um círculo
     double camX = radius * std::sin(angleRad);
-    double camY = 300.0; // Posição Y fixa (olhando levemente de cima)
+    double camY = radius * std::cos(angleRad); // Posição Y fixa (olhando levemente de cima)
     // double camZ = radius * std::cos(angleRad);
-    double camZ = radius * std::cos(angleRad);
+    double camZ = 300;
 
     Vector3D cameraPos(camX, camY, camZ);
     Vector3D target(0, 0, 0); // Olhando para o centro
