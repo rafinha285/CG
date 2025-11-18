@@ -5,6 +5,9 @@
 #ifndef CG_POINT3D_H // <-- MUDANÇA AQUI
 #define CG_POINT3D_H
 #include "Shape3D.h"
+#include "../window/Window.h"
+#include "../shapes/Point.h"   // <--- NOVO: Para poder usar a classe Point (2D)
+#include "../matrix/Matrix3x3.h"
 
 
 class Point3D: public Shape3D
@@ -29,18 +32,30 @@ public:
         this->vector = transMatrix * this->vector;
     }
 
-    void drawTransformed(QPainter& painter, const Matrix4x4& finalTransform) const override
+    void drawTransformed(
+        QPainter& painter,
+        const Matrix4x4& finalTransform,
+        const Matrix4x4 viewportTransform,
+        Window3D* window
+    ) const override
     {
         Vector3D screenPoint = finalTransform * this->vector;
         double w = screenPoint.w();
-        if (w == 0.0) return; // Evita divisão por zero
+        if (w == 0.0) return;
 
         double screenX = screenPoint.x() / w;
         double screenY = screenPoint.y() / w;
 
-        // 3. Desenha o ponto na tela
-        painter.setPen(QPen(QColor(color.r, color.g, color.b), 3)); // Caneta de 3px
-        painter.drawPoint(static_cast<int>(screenX), static_cast<int>(screenY));
+        // 1. CONVERSÃO DA MATRIZ (Usando o novo construtor)
+        const Matrix3x3 viewportTransform2D = Matrix3x3(viewportTransform);
+
+        // 2. CONVERSÃO DA WINDOW (Agora que a herança é pública)
+        Window* window2D = static_cast<Window*>(window);
+
+        auto point = Point(screenX, screenY, this->color); // Use o construtor com cor
+
+        // 3. Chamada com os tipos 2D
+        point.draw(painter, viewportTransform2D, window2D);
     }
 };
 

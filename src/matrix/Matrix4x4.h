@@ -8,16 +8,17 @@
 
 #include "../vector/Vector3D.h"
 #include "../window/Window3D.h"
+#include "viewport/Viewport.h"
 
 class Vector3D;
 
 class Matrix4x4
 {
     static constexpr int DIMENSION = 4;
-    double m[DIMENSION][DIMENSION];
 
     friend class Vector3D;
 public:
+    double m[DIMENSION][DIMENSION];
     Matrix4x4(): m{
         {1.0, 0.0, 0.0, 0.0},
         {0.0, 1.0, 0.0, 0.0},
@@ -191,6 +192,36 @@ public:
         viewMatrix.m[2][3] = -Vector3D::dot(zaxis, eye);
 
         return viewMatrix;
+    }
+
+    static Matrix4x4 createPerspective(
+        const double fovDegrees,
+        const double aspectRatio,
+        const double nearPlane,
+        const double farPlane
+    )
+    {
+        Matrix4x4 result;
+
+        for (auto & i : result.m) for (double & j : i) j = 0.0;
+
+        const double fovRad = fovDegrees * (M_PI / 180.0);
+        const double tanHalfFov = std::tan(fovRad / 2.0);
+        const double f = 1.0 / tanHalfFov;
+
+        result.m[0][0] = f / aspectRatio;
+        result.m[1][1] = f;
+        result.m[2][2] = -(farPlane + nearPlane) / (farPlane - nearPlane);
+        result.m[2][3] = -(2.0 * farPlane * nearPlane) / (farPlane- nearPlane);
+
+        result.m[3][2] = -1.0;
+        result.m[3][3] = 0.0;
+        return result;
+    }
+
+    double get(int x, int y) const
+    {
+        return this->m[x][y];
     }
 };
 

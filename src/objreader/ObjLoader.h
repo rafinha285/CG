@@ -8,11 +8,11 @@
 #include <vector>
 
 #include "../../GraphicsFrame.h"
-#include "../3d/shapes/Line3D.h"
+#include "../shapes/Line3D.h"
 
 #include <QRegularExpression>
 
-#include "../3d/shapes/Polygon3D.h"
+#include "../shapes/Polygon3D.h"
 
 class ObjLoader
 {

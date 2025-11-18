@@ -4,7 +4,9 @@
 
 #ifndef CG_LINE3D_H
 #define CG_LINE3D_H
-#include "Point3D.h"
+#include "shapes/Point3D.h"
+#include "Point.h"
+#include "Line.h"
 // #include "Polygon3D.h"
 #include "Shape3D.h"
 
@@ -74,17 +76,39 @@ public:
 
 protected:
 
-    void drawTransformed(QPainter& painter, const Matrix4x4& finalTransform) const override
+    void drawTransformed(
+        QPainter& painter,
+        const Matrix4x4& finalTransform,
+        const Matrix4x4 viewportTransform,
+        Window3D* window
+    ) const override
     {
-        // p1.drawTransformed(painter, finalTransform);
-        auto p1 = finalTransform * this->p1.vector;
-        auto p2 = finalTransform * this->p2.vector;
-        // p2.drawTransformed(painter, finalTransform);
-        painter.setPen(QPen(QColor::fromRgb(color.r, color.g, color.b), 2));
-        painter.drawLine(
-            QPoint(static_cast<int>(p1.x()),static_cast<int>(p1.y())),
-            QPoint(static_cast<int>(p2.x()),static_cast<int>(p2.y()))
-        );
+        // 1. Transformação 3D (Coordenadas de Cena -> Coordenadas de Clipping/Projeção)
+        auto p1Transformed = finalTransform * this->p1.vector;
+        auto p2Transformed = finalTransform * this->p2.vector;
+
+        // Aplicação da Divisão por W (Perspectiva) - É fundamental antes de ir para 2D
+        double w1 = p1Transformed.w();
+        double w2 = p2Transformed.w();
+
+        if (w1 == 0.0 || w2 == 0.0) return; // Evita divisão por zero
+
+        auto p1_screen = Vector2D(p1Transformed.x() / w1, p1Transformed.y() / w1);
+        auto p2_screen = Vector2D(p2Transformed.x() / w2, p2Transformed.y() / w2);
+
+        auto p12D = Point(p1_screen.x(), p1_screen.y(), this->color);
+        auto p22D = Point(p2_screen.x(), p2_screen.y(), this->color);
+        auto line = Line(p12D, p22D, this->color);
+
+        // 3. Conversão das Matrizes e Windows para o 2D (Clipping)
+
+        // --- CORREÇÃO AQUI: Passe a matrix viewportTransform para o construtor ---
+        const Matrix3x3 viewportTransform2D = Matrix3x3(viewportTransform);
+
+        auto* window2D = static_cast<Window*>(window);
+
+        // 4. Chamada da rotina 2D (Clipping + Desenho)
+        line.clipAndDraw(painter, viewportTransform2D, window2D);
     };
 
 private:

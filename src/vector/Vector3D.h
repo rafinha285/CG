@@ -36,6 +36,43 @@ public:
         return v1.x() * v2.x() + v1.y() * v2.y() + v1.z() * v2.z();
     }
 
+    Vector3D operator+(const Vector3D& other) const
+    {
+        return Vector3D(
+            m_coords[0] + other.m_coords[0],
+            m_coords[1] + other.m_coords[1],
+            m_coords[2] + other.m_coords[2]
+        );
+    }
+
+    Vector3D operator-(const Vector3D& other) const
+    {
+        return Vector3D(
+            m_coords[0] - other.m_coords[0],
+            m_coords[1] - other.m_coords[1],
+            m_coords[2] - other.m_coords[2]
+        );
+    }
+
+    Vector3D operator*(double scalar) const
+    {
+        return Vector3D(
+            m_coords[0] * scalar,
+            m_coords[1] * scalar,
+            m_coords[2] * scalar
+        );
+    }
+
+    Vector3D operator/(double scalar) const
+    {
+        if (scalar == 0) return Vector3D();
+        return Vector3D(
+            m_coords[0] / scalar,
+            m_coords[1] / scalar,
+            m_coords[2] / scalar
+        );
+    }
+
     static Vector3D cross(const Vector3D& v1, const Vector3D& v2) {
         return Vector3D(
             v1.y() * v2.z() - v1.z() * v2.y(),

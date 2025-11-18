@@ -12,8 +12,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
-set(TS_FILES CG_pt_BR.ts
-        src/2d/window/Window.h)
+# Adiciona a pasta 'src' ao caminho de inclusão.
+# Isso permite que você faça #include "Window.h" ao invés de #include "src/Window.h" no código.
+include_directories(src)
+
+# Removi o caminho antigo do Window.h daqui, pois estava causando erro
+set(TS_FILES CG_pt_BR.ts)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -21,53 +25,56 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         ${TS_FILES}
-#        aShape.cpp
-#        aShape.h
         GraphicsFrame.cpp
         GraphicsFrame.h
-        src/2d/vector/Vector2D.h
-        src/2d/window/Window.h
-        src/2d/window/Window.h
-        src/2d/viewport/Viewport.h
-        src/2d/matrix/Matrix3x3.h
-        src/2d/shapes/Shape.h
-        src/2d/shapes/Point.h
-        src/2d/shapes/Line.h
-        src/2d/shapes/Square.h
-        src/2d/shapes/Polygon.h
-        src/2d/window/Window.h
-        src/3d/matrix/Matrix4x4.h
-        src/3d/vector/Vector3D.h
-        src/3d/shapes/Shape3D.h
-        src/3d/shapes/Point3D.h
-        src/3d/window/Window3D.h
-        src/3d/shapes/Line3D.h
+
+        # --- Arquivos nas subpastas de SRC ---
+        # 1. Vector
+        src/vector/Vector2D.h
+        src/vector/Vector3D.h
+
+        # 2. Window (assumindo que Window.h é 2D e Window3D.h é 3D)
+        src/window/Window.h
+        src/window/Window3D.h
+
+        # 3. Viewport
+        src/viewport/Viewport.h
+
+        # 4. Matrix
+        src/matrix/Matrix3x3.h
+        src/matrix/Matrix4x4.h
+
+        # 5. Shapes
+        src/shapes/Shape.h
+        src/shapes/Point.h
+        src/shapes/Line.h
+        src/shapes/Square.h
+        src/shapes/Polygon.h
+        src/shapes/Shape3D.h
+        src/shapes/Point3D.h
+        src/shapes/Line3D.h
+        src/shapes/Polygon3D.h
+
+        # 6. ObjReader
         src/objreader/ObjLoader.h
-        src/3d/shapes/Polygon3D.h
         src/objreader/ObjLoader.cpp
+        src/Camera.h # Não se esqueça do .cpp!
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(CG
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
+            MANUAL_FINALIZATION
+            ${PROJECT_SOURCES}
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET CG APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
     if(ANDROID)
         add_library(CG SHARED
-            ${PROJECT_SOURCES}
+                ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(CG
-            ${PROJECT_SOURCES}
+                ${PROJECT_SOURCES}
         )
     endif()
 
@@ -76,25 +83,23 @@ endif()
 
 target_link_libraries(CG PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.CG)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.CG)
 endif()
+
 set_target_properties(CG PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+        ${BUNDLE_ID_OPTION}
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        MACOSX_BUNDLE TRUE
+        WIN32_EXECUTABLE TRUE
 )
 
 include(GNUInstallDirs)
 install(TARGETS CG
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)

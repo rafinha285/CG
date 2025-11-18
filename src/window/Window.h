@@ -5,7 +5,7 @@
 #ifndef CG_WINDOW_H
 #define CG_WINDOW_H
 
-#include "../vector/Vector2D.h"
+#include "vector/Vector2D.h"
 
 
 class Window

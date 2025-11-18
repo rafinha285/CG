@@ -4,8 +4,10 @@
 
 #ifndef CG_POLYGON3D_H
 #define CG_POLYGON3D_H
-#include "Shape3D.h"
+#include "shapes/Shape3D.h"
 #include "Line3D.h"
+// #include "../CG/src/2d/shapes/Point.h"
+#include "shapes/Line.h"
 
 
 class Polygon3D: public Shape3D
@@ -82,11 +84,16 @@ public:
         this->color = color;
     }
 protected:
-    void drawTransformed(QPainter& painter, const Matrix4x4& finalTransform) const override
+    void drawTransformed(
+        QPainter& painter,
+        const Matrix4x4& finalTransform,
+        const Matrix4x4 viewportTransform,
+        Window3D* window
+    ) const override
     {
         for (const Line3D& line : lines)
         {
-            line.draw(painter, finalTransform);
+            line.draw(painter, finalTransform, viewportTransform, window);
         }
     };
 private:

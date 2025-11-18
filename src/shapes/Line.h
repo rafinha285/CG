@@ -14,6 +14,10 @@ class Line final: public Shape
 {
     public:
     Line(Point  p1, Point  p2) : p1(std::move(p1)), p2(std::move(p2)){};
+    Line(Point p1 , Point p2 , Color color): p1(std::move(p1)), p2(std::move(p2))
+    {
+        this->color = color;
+    };
     Line(const double x1, const double y1, const double x2, const double y2, const Color color) : p1(x1, y1, color), p2(x2, y2, color)
     {
        this->color = color;

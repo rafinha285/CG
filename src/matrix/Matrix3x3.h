@@ -4,12 +4,15 @@
 
 #ifndef CG_MATRIX3X3_H
 #define CG_MATRIX3X3_H
-#include "../vector/Vector2D.h"
-#include "../viewport/Viewport.h"
-#include "../window/Window.h"
+#include "vector/Vector2D.h"
+#include "viewport/Viewport.h"
+#include "window/Window.h"
 #include <cmath>
 
+#include "Matrix4x4.h"
 
+
+class Matrix4x4;
 class Window;
 
 class Matrix3x3
@@ -21,6 +24,16 @@ public:
           {1.0, 0.0, 0.0},
           {0.0, 1.0, 0.0},
           {0.0, 0.0, 1.0}
+    }{}
+
+    Matrix3x3(
+        double m00, double m01, double m02,
+        double m10, double m11, double m12,
+        double m20, double m21, double m22
+    ) : m{
+            {m00, m01, m02},
+            {m10, m11, m12},
+            {m20, m21, m22}
     }{}
 
     Matrix3x3 operator*(const Matrix3x3& other) const
@@ -114,6 +127,11 @@ public:
         const Matrix3x3 transform = temp * T1;
         return transform;
     }
+    Matrix3x3(const Matrix4x4& other) : m{
+            {other.m[0][0], other.m[0][1], other.m[0][3]},
+            {other.m[1][0], other.m[1][1], other.m[1][3]},
+            {other.m[3][0], other.m[3][1], other.m[3][3]}
+    }{}
 };
 
 

@@ -6,9 +6,9 @@
 #define CG_SHAPE3D_H
 #include <QPainter>
 
-#include "../../2d/shapes/Shape.h"
-#include "../../2d/window/Window.h"
-#include "../matrix/Matrix4x4.h"
+#include "Shape.h"
+#include "window/Window.h"
+#include "matrix/Matrix4x4.h"
 
 
 class Shape3D
@@ -16,9 +16,14 @@ class Shape3D
 public:
     virtual ~Shape3D() = default;
 
-    void draw(QPainter &painter, const Matrix4x4& finalTransform) const
+    void draw(
+        QPainter &painter,
+        const Matrix4x4& finalTransform,
+        const Matrix4x4 viewportTransform,
+        Window3D* window
+    ) const
     {
-        drawTransformed(painter, finalTransform);
+        drawTransformed(painter, finalTransform, viewportTransform, window);
     }
 
     virtual void translate(double tx, double ty, double tz){}
@@ -33,7 +38,12 @@ public:
     }
 
 protected:
-    virtual void drawTransformed(QPainter &painter, const Matrix4x4 &finalTransform) const = 0;
+    virtual void drawTransformed(
+        QPainter& painter,
+        const Matrix4x4& finalTransform,
+        Matrix4x4 viewportTransform,
+        Window3D* window
+    ) const = 0;
     Color color{};
 
 };

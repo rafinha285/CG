@@ -3,6 +3,8 @@
 //
 
 #include "ObjLoader.h"
+#include <limits>
+#include <algorithm>
 
 std::vector<Point3D> ObjLoader::points;
 std::vector<Polygon3D> ObjLoader::polygons;
@@ -89,5 +91,49 @@ void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame)
     {
         frame->addShape(std::make_unique<Polygon3D>(polygon));
     }
+
+    if (!points.empty())
+    {
+        double minX = std::numeric_limits<double>::max();
+        double maxX = std::numeric_limits<double>::lowest();
+        double minY = minX, maxY = maxX;
+        double minZ = minX, maxZ = maxX;
+
+        for (const auto& p : points)
+        {
+            double px = p.vector.x();
+            double py = p.vector.y();
+            double pz = p.vector.z();
+
+            if (px < minX) minX = px;
+            if (px > maxX) maxX = px;
+            if (py < minY) minY = py;
+            if (py > maxY) maxY = py;
+            if (pz < minZ) minZ = pz;
+            if (pz > maxZ) maxZ = pz;
+        }
+
+        double centerX = (minX + maxX) / 2.0;
+        double centerY = (minY + maxY) / 2.0;
+        double centerZ = (minZ + maxZ) / 2.0;
+
+        double sizeX = maxX - minX;
+        double sizeY = maxY - minY;
+        double sizeZ = maxZ - minZ;
+
+        double maxDimension = std::max({sizeX, sizeY, sizeZ});
+
+        if (maxDimension == 0) maxDimension = 100.0;
+
+        frame->m_camera.m_vrp = Vector3D(centerX, centerY, centerZ);
+
+        frame->m_camera.m_radius = maxDimension * 1.5;
+
+        frame->m_camera.m_orthoWidth = frame->m_camera.m_radius;
+
+        // Recalcula a posição do olho da câmera (Eye)
+        frame->m_camera.updateEyeFromAngles();
+    }
+
     frame->update();
 };
