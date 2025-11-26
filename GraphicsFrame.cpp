@@ -17,6 +17,8 @@ GraphicsFrame::GraphicsFrame(QWidget *parent)
 {
     m_isRightMouseDown = false;
     setFrameShape(QFrame::StyledPanel);
+
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 
@@ -57,6 +59,35 @@ void GraphicsFrame::paintEvent(QPaintEvent *event)
     }
 
 }
+
+void GraphicsFrame::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key())
+    {
+        case Qt::Key_W:
+            m_camera.translate(speed, 0, 0); // Frente
+            break;
+        case Qt::Key_S:
+            m_camera.translate(-speed, 0, 0); // Trás
+            break;
+        case Qt::Key_A:
+            m_camera.translate(0, -speed, 0); // Esquerda
+            break;
+        case Qt::Key_D:
+            m_camera.translate(0, speed, 0); // Direita
+            break;
+        case Qt::Key_Space:
+            m_camera.translate(0, 0, speed); // Subir (Eixo Y Global)
+            break;
+        case Qt::Key_Shift:
+            m_camera.translate(0, 0, -speed); // Descer (Eixo Y Global)
+            break;
+        default:
+            QFrame::keyPressEvent(event);
+            return;
+    }
+}
+
 void GraphicsFrame::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton)
@@ -89,7 +120,7 @@ void GraphicsFrame::mouseMoveEvent(QMouseEvent *event)
 
         // Delegamos a rotação para a classe Camera
         // Invertemos dx/dy conforme gosto pessoal (arrastar cenário vs mover camera)
-        m_camera.rotate(-dx * sensitivity, -dy * sensitivity);
+        m_camera.rotate(dx * sensitivity, dy * sensitivity);
 
         m_lastMousePos = currentPos;
         update(); // Redesenha a tela

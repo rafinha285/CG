@@ -121,6 +121,21 @@ public:
         }
     }
 
+    void translate(double forward, double right, double up)
+    {
+        Vector3D viewDir = m_vrp - m_cop;
+        Vector3D f = Vector3D::normalize(viewDir);
+
+        Vector3D r = Vector3D::normalize(Vector3D::cross(f, m_vpn));
+
+        Vector3D u = Vector3D(0,1,0);
+
+        Vector3D delta = (f * forward) + (r * right) + (u * up);
+
+        m_vrp = m_vrp + delta;
+
+        updateEyeFromAngles();
+    }
 };
 
 #endif //CG_CAMERA_H

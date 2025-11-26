@@ -20,10 +20,12 @@ class GraphicsFrame : public QFrame
         Camera m_camera;
         explicit GraphicsFrame(QWidget *parent = nullptr);
         void addShape(std::unique_ptr<::Shape3D> shape);
+        double speed = 10;
 
     protected:
         void paintEvent(QPaintEvent *event) override;
         void resizeEvent(QResizeEvent *event) override;
+        void keyPressEvent(QKeyEvent *event) override;
         void mousePressEvent(QMouseEvent *event) override;
         void mouseMoveEvent(QMouseEvent *event) override;
         void mouseReleaseEvent(QMouseEvent *event) override;
