@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFile>
+#include <QVBoxLayout>
 
 #include "src/objreader/ObjLoader.h"
 
@@ -18,8 +19,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     graphicsFrame = new GraphicsFrame(this);
-    setCentralWidget(graphicsFrame);
 
+    if (ui->container3D){
+        QVBoxLayout *layout = new QVBoxLayout(ui->container3D);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(graphicsFrame);
+    }
     connect(ui->actionImport, &QAction::triggered, this, &MainWindow::handleImport);
 
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::handleExit);
