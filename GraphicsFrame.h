@@ -21,6 +21,7 @@ class GraphicsFrame : public QFrame
         explicit GraphicsFrame(QWidget *parent = nullptr);
         void addShape(std::unique_ptr<::Shape3D> shape);
         double speed = 10;
+        double sensitivity = 0.01;
         void setSelectedObject(int index);
 
         void translateSelected(double x, double y, double z);
@@ -32,6 +33,10 @@ class GraphicsFrame : public QFrame
         void deleteSelected();
 
         void resetCamera();
+
+        void changeColor(Color color);
+
+        Shape3D *getSelectedShape() const;
 
     signals:
         void objectAdded(const QString &name);

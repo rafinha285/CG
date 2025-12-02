@@ -20,6 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     graphicsFrame = new GraphicsFrame(this);
 
+    //color
+    redValue = ui->redValue;
+    greenValue = ui->greenValue;
+    blueValue = ui->blueValue;
+
+
     if (ui->container3D){
         QVBoxLayout *layout = new QVBoxLayout(ui->container3D);
         layout->setContentsMargins(0, 0, 0, 0);
@@ -107,6 +113,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     ui->perspectiveRadioButton->setChecked(true);
+    graphicsFrame->setProjection(true);
 
     connect(ui->cameraSpeedValue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [=](double value)
     {
@@ -120,11 +127,48 @@ MainWindow::MainWindow(QWidget *parent)
         ui->mainObjectList->addItem(name);
     });
 
-    connect(ui->mainObjectList, &QListWidget::currentRowChanged,
-        graphicsFrame, &GraphicsFrame::setSelectedObject);
+    connect(ui->sensibilityValue, &QDoubleSpinBox::valueChanged, this, [=](double value)
+    {
+        graphicsFrame->sensitivity = value;
+    });
+
+    ui->sensibilityValue->setValue(graphicsFrame->sensitivity);
+
+    connect(ui->mainObjectList, &QListWidget::currentRowChanged,graphicsFrame, [=](int index)
+    {
+        printf("%d",index);
+        graphicsFrame->setSelectedObject(index);
+        if (index >= 0)
+        {
+            auto color = graphicsFrame->getSelectedShape()->getColor();
+            redValue->setValue(color.r);
+            greenValue->setValue(color.g);
+            blueValue->setValue(color.b);
+        }
+    });
+
+
+    connect(ui->redValue, &QSpinBox::valueChanged, this, [=](int value)
+    {
+        changeColor();
+    });
+    connect(ui->greenValue, &QSpinBox::valueChanged, this, [=](int value)
+    {
+        changeColor();
+    });
+    connect(ui->blueValue, &QSpinBox::valueChanged, this, [=](int value)
+    {
+        changeColor();
+    });
+
+
 
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::handleExit);
 }
+void MainWindow::changeColor() const
+{
+    graphicsFrame->changeColor({redValue->value(), greenValue->value(), blueValue->value()});
+};
 
 void MainWindow::handleExit()
 {

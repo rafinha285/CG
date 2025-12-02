@@ -18,6 +18,7 @@ void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame, c
 
     auto wholeModel = std::make_unique<Polygon3D>();
     wholeModel->setName(fileName);
+    wholeModel->setColor({255, 255, 255});
 
     while (!textStream->atEnd())
     {

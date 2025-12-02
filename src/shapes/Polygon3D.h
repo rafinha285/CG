@@ -87,9 +87,13 @@ public:
         }
     }
 
-    void serColor(Color color)
+    void setColor(Color color) override
     {
         this->color = color;
+        for (auto& line : lines)
+        {
+            line.setColor(color);
+        }
     }
 protected:
     void drawTransformed(

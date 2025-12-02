@@ -37,9 +37,14 @@ public:
 
     virtual Vector3D getCenter(){}
 
-    void setColor(const Color color)
+    virtual void setColor(const Color color)
     {
         this->color = color;
+    }
+
+    Color getColor() const
+    {
+        return this->color;
     }
 
     void setName(const std::string& n) { m_name = n; }

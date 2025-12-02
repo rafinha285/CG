@@ -44,7 +44,17 @@ void GraphicsFrame::setSelectedObject(int index)
     }
     update();
 }
+Shape3D* GraphicsFrame::getSelectedShape() const
+{
+    return displayFile[m_selectedObjectIndex].get();
+}
 
+void GraphicsFrame::changeColor(Color color)
+{
+    auto shape = getSelectedShape();
+    shape->setColor(color);
+    update();
+}
 void GraphicsFrame::deleteSelected()
 {
     if (m_selectedObjectIndex >= 0 && m_selectedObjectIndex < displayFile.size())
@@ -64,8 +74,8 @@ void GraphicsFrame::translateSelected(double x, double y, double z)
     {
         return;
     }
-    const auto object = &displayFile[m_selectedObjectIndex];
-    object->get()->translate(x,y,z);
+    const auto object = getSelectedShape();
+    object->translate(x,y,z);
     update();
 }
 
@@ -75,9 +85,9 @@ void GraphicsFrame::scaleSelected(const double x, const double y,const double z)
     {
         return;
     }
-    const auto object= &displayFile[m_selectedObjectIndex];
-    const auto center = object->get()->getCenter();
-    object->get()->scale(x,y,z, center);
+    const auto object= getSelectedShape();
+    const auto center = object->getCenter();
+    object->scale(x,y,z, center);
     update();
 }
 
@@ -85,16 +95,17 @@ void GraphicsFrame::rotateSelected(double angle, char axis)
 {
     if (m_selectedObjectIndex != -1 && m_selectedObjectIndex < displayFile.size()) {
 
-        Vector3D center = displayFile[m_selectedObjectIndex]->getCenter();
+        const auto object = getSelectedShape();
+        const Vector3D center = object->getCenter();
 
         if (axis == 'X') {
-            displayFile[m_selectedObjectIndex]->rotateX(angle, center);
+            object->rotateX(angle, center);
         }
         else if (axis == 'Y') {
-            displayFile[m_selectedObjectIndex]->rotateY(angle, center);
+            object->rotateY(angle, center);
         }
         else if (axis == 'Z') {
-            displayFile[m_selectedObjectIndex]->rotateZ(angle, center);
+            object->rotateZ(angle, center);
         }
 
         update();
@@ -271,7 +282,6 @@ void GraphicsFrame::mouseMoveEvent(QMouseEvent *event)
     int dx = currentPos.x() - m_lastMousePos.x();
     int dy = currentPos.y() - m_lastMousePos.y();
 
-    double sensitivity = 0.01;
     if (m_isRightMouseDown)
     {
         m_camera.rotate(-dx * sensitivity, -dy * sensitivity);

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSpinBox>
 
 #include "GraphicsFrame.h"
 
@@ -31,8 +32,13 @@ private slots:
     void handleExit();
 
 private:
+    void changeColor() const;
     batata translation;
     Ui::MainWindow *ui;
     GraphicsFrame *graphicsFrame;
+
+    QSpinBox *redValue;
+    QSpinBox *greenValue;
+    QSpinBox *blueValue;
 };
 #endif // MAINWINDOW_H
