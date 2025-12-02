@@ -31,24 +31,26 @@ public:
         this->vector = transMatrix * this->vector; // Usa o operador *
     }
 
+    void scaleWithCenter(double sx, double sy, const Vector2D& center)
+    {
+        Matrix3x3 scaleMatrix = Matrix3x3::createScaleInCenterMatrix(sx, sy, center);
+        this->vector = scaleMatrix * this->vector;
+    }
+
     void scale(double sx, double sy) override
     {
-        Matrix3x3 scaleMatrix = Matrix3x3::createScaleMatrix(sx, sy);
-        this->vector = scaleMatrix * this->vector; // Usa o operador *
+        this->scaleWithCenter(sx, sy, this->vector);
     }
 
     void rotate(double angle, const Vector2D& center) override
     {
-        Matrix3x3 T_neg = Matrix3x3::createTranslationMatrix(-center.x(), -center.y());
+        Matrix3x3 rotationMatrix = Matrix3x3::createRotationInCenterMatrix(angle, center);
+        this->vector = rotationMatrix * this->vector;
+    }
 
-        Matrix3x3 R =  Matrix3x3::createRotationMatrix(angle);
-
-        // 3. Cria matriz de translação DE VOLTA para o local
-        Matrix3x3 T_pos =  Matrix3x3::createTranslationMatrix(center.x(), center.y());
-
-        // 4. Aplica a transformação composta ao vetor deste ponto
-        // A ordem é importante: P' = T_pos * R * T_neg * P
-        this->vector = T_pos * R * T_neg * this->vector;
+    void rotate(double angle)
+    {
+        this->rotate(angle, this->vector);
     }
 
     Color getColor() const

@@ -28,6 +28,22 @@ public:
         this->lines.push_back(line);
     }
 
+    void translate(const double x, const double y, const double z) override
+    {
+        for (Line3D& line : this->lines)
+        {
+            line.translate(x,y,z);
+        }
+    }
+
+    void scale(const double sx, const double sy,const double sz, const Vector3D& center) override
+    {
+        for (Line3D& line : this->lines)
+        {
+            line.scale(sx,sy,sz, center);
+        }
+    };
+
     void rotateX(double angle)
     {
         Vector3D center = this->getCenter();
@@ -56,7 +72,7 @@ public:
     };
 
 
-    Vector3D getCenter() const
+    Vector3D getCenter() override
     {
         if (lines.empty())
         {

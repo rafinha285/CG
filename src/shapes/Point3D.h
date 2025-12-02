@@ -32,6 +32,17 @@ public:
         this->vector = transMatrix * this->vector;
     }
 
+    void scale(double sx, double sy, double sz, const Vector3D& center) override
+    {
+        Matrix4x4 scaleMatrix = Matrix4x4::createScale(sx, sy, sz, center);
+        this->vector = scaleMatrix * this->vector;
+    };
+
+    Vector3D getCenter() override
+    {
+        return this->vector;
+    };
+
     void drawTransformed(
         QPainter& painter,
         const Matrix4x4& finalTransform,

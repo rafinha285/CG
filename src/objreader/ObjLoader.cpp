@@ -11,8 +11,14 @@ std::vector<Polygon3D> ObjLoader::polygons;
 
 void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame)
 {
-    points.clear();
-    polygons.clear();
+    // points.clear();
+    // polygons.clear();
+
+    std::vector<Point3D> tempPoints;
+
+    auto wholeModel = std::make_unique<Polygon3D>();
+    wholeModel->setName("Modelo Importado");
+
     while (!textStream->atEnd())
     {
         QString currentLine = textStream->readLine().trimmed();
@@ -29,76 +35,43 @@ void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame)
                 const double rawZ = tokens[3].toDouble();
 
                 const double x = rawX;
-                const double y = -rawZ;
-                const double z = rawY;
+                const double y = rawY;
+                const double z = rawZ;
 
-                points.push_back(Point3D(x, y, z));
+                tempPoints.push_back(Point3D(x, y, z));
             }
         }
 
         if (currentLine.startsWith("f "))
         {
             QStringList tokens = currentLine.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-
-            // --- Correção do Bug 1 ---
-            // Pula se for uma linha ou ponto (precisa de pelo menos 3 vértices)
-            if (tokens.size() < 4)
-            {
-                continue;
-            }
-
-            // Cria um novo polígono para esta face
-            Polygon3D currentFace;
-            currentFace.setColor({255,255,255}); // Define a cor do polígono
+            if (tokens.size() < 4) continue;
 
             std::vector<int> indices;
-
-            // Loop começa em 1 para pular a letra "f"
             for (int i = 1; i < tokens.size(); i++)
-            {
-                // Pega o primeiro número (índice do vértice)
-                QString vertexIndexStr = tokens[i].split('/').first();
-                indices.push_back(vertexIndexStr.toInt());
-            }
+                indices.push_back(tokens[i].split('/').first().toInt());
 
-            // Cria as linhas (arestas) da face
             for (size_t i = 0; i < indices.size(); i++)
             {
-                // Pega o índice atual e o próximo (ou o primeiro, para fechar a face)
-                int index1 = indices[i];
-                int index2 = indices[(i + 1) % indices.size()];
+                int idx1 = indices[i] - 1;
+                int idx2 = indices[(i + 1) % indices.size()] - 1;
 
-                // Converte de 1-based (OBJ) para 0-based (vector)
-                int p1_idx = index1 - 1;
-                int p2_idx = index2 - 1;
-
-                // Checagem de segurança
-                if (p1_idx < 0 || p1_idx >= points.size() ||
-                    p2_idx < 0 || p2_idx >= points.size())
+                if (idx1 >= 0 && idx1 < tempPoints.size() && idx2 >= 0 && idx2 < tempPoints.size())
                 {
-                    qDebug() << "Erro: Índice de face inválido encontrado!";
-                    continue;
+                    wholeModel->addLine(Line3D(tempPoints[idx1], tempPoints[idx2], {255, 255, 255}));
                 }
-
-                // Pega os pontos reais
-                Point3D p1 = points[p1_idx];
-                Point3D p2 = points[p2_idx];
-
-                // Adiciona a linha ao polígono da face
-                currentFace.addLine(Line3D(p1, p2, {255,255,255}));
             }
-            polygons.push_back(currentFace);
         }
     }
 
-    if (!points.empty())
+    if (!tempPoints.empty())
     {
         double minX = std::numeric_limits<double>::max();
         double maxX = std::numeric_limits<double>::lowest();
         double minY = minX, maxY = maxX;
         double minZ = minX, maxZ = maxX;
 
-        for (const auto& p : points)
+        for (const auto& p : tempPoints)
         {
             double px = p.vector.x();
             double py = p.vector.y();
@@ -130,55 +103,58 @@ void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame)
 
         frame->m_camera.m_orthoWidth = frame->m_camera.m_radius;
 
-        // Recalcula a posição do olho da câmera (Eye)
         frame->m_camera.updateEyeFromAngles();
 
-        auto grid = std::make_unique<Polygon3D>();
-        Color gridColor = {80, 80, 80};
 
-        double step = maxDimension / 5.0;
-        if (step < 0.001) step = 1.0;
-        double epsilon = 0.001;
 
-        auto generateSteps = [&](double min, double max, double s) -> std::vector<double> {
-            std::vector<double> coords;
-            for (double v = min; v <= max + epsilon; v += s) {
-                coords.push_back(v);
-            }
-            if (std::abs(coords.back() - max) > epsilon) {
-                coords.push_back(max);
-            }
-            return coords;
-        };
-
-        std::vector<double> xCoords = generateSteps(minX, maxX, step);
-        std::vector<double> yCoords = generateSteps(minY, maxY, step);
-        std::vector<double> zCoords = generateSteps(minZ, maxZ, step);
-
-        for (double x : xCoords) {
-            for (double z : zCoords) {
-                grid->addLine(Line3D(Point3D(x, minY, z), Point3D(x, maxY, z), gridColor));
-            }
-        }
-
-        for (double y : yCoords) {
-            for (double z : zCoords) {
-                grid->addLine(Line3D(Point3D(minX, y, z), Point3D(maxX, y, z), gridColor));
-            }
-        }
-
-        for (double x : xCoords) {
-            for (double y : yCoords) {
-                grid->addLine(Line3D(Point3D(x, y, minZ), Point3D(x, y, maxZ), gridColor));
-            }
-        }
-
-        frame->addShape(std::move(grid));
+        // auto grid = std::make_unique<Polygon3D>();
+        // grid->setName("Grid");
+        // Color gridColor = {80, 80, 80};
+        //
+        // double step = maxDimension / 5.0;
+        // if (step < 0.001) step = 1.0;
+        // double epsilon = 0.001;
+        //
+        // auto generateSteps = [&](double min, double max, double s) -> std::vector<double> {
+        //     std::vector<double> coords;
+        //     for (double v = min; v <= max + epsilon; v += s) {
+        //         coords.push_back(v);
+        //     }
+        //     if (std::abs(coords.back() - max) > epsilon) {
+        //         coords.push_back(max);
+        //     }
+        //     return coords;
+        // };
+        //
+        // std::vector<double> xCoords = generateSteps(minX, maxX, step);
+        // std::vector<double> yCoords = generateSteps(minY, maxY, step);
+        // std::vector<double> zCoords = generateSteps(minZ, maxZ, step);
+        //
+        // for (double x : xCoords) {
+        //     for (double z : zCoords) {
+        //         grid->addLine(Line3D(Point3D(x, minY, z), Point3D(x, maxY, z), gridColor));
+        //     }
+        // }
+        //
+        // for (double y : yCoords) {
+        //     for (double z : zCoords) {
+        //         grid->addLine(Line3D(Point3D(minX, y, z), Point3D(maxX, y, z), gridColor));
+        //     }
+        // }
+        //
+        // for (double x : xCoords) {
+        //     for (double y : yCoords) {
+        //         grid->addLine(Line3D(Point3D(x, y, minZ), Point3D(x, y, maxZ), gridColor));
+        //     }
+        // }
+        //
+        // frame->addShape(std::move(grid));
     }
 
-    for (Polygon3D polygon : polygons)
-    {
-        frame->addShape(std::make_unique<Polygon3D>(polygon));
+    if (!wholeModel->getCenter().x() && tempPoints.empty()) {
+        // Verifica se o modelo está vazio antes de adicionar
+    } else {
+        frame->addShape(std::move(wholeModel));
     }
 
     frame->update();

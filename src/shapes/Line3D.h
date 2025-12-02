@@ -40,10 +40,10 @@ public:
         this->p2.translate(tx, ty, tz);
     }
 
-    void scale(const double sx,const double sy, const double sz) override
+    void scale(const double sx,const double sy, const double sz, const Vector3D& center) override
     {
-        this->p1.scale(sx, sy, sz);
-        this->p2.scale(sx, sy, sz);
+        this->p1.scale(sx, sy, sz, center);
+        this->p2.scale(sx, sy, sz, center);
     }
 
     void rotateX(double angle, const Vector3D& center) override
@@ -72,6 +72,11 @@ public:
     Point3D getP2()
     {
         return p2;
+    }
+
+    Vector3D getCenter() override
+    {
+        return calculateMiddle();
     }
 
 protected:

@@ -5,6 +5,13 @@
 
 #include "GraphicsFrame.h"
 
+struct batata
+{
+    double X;
+    double Y;
+    double Z;
+};
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -21,9 +28,11 @@ public:
 
 private slots:
     void handleImport();
+    void handleTranslate();
     void handleExit();
 
 private:
+    batata translation;
     Ui::MainWindow *ui;
     GraphicsFrame *graphicsFrame;
 };

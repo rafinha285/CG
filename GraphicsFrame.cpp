@@ -24,9 +24,44 @@ GraphicsFrame::GraphicsFrame(QWidget *parent)
 
 void GraphicsFrame::addShape(std::unique_ptr<::Shape3D> shape)
 {
+    if (shape->getName() == "Objeto Sem Nome" || shape->getName().empty()) {
+        shape->setName("Objeto " + std::to_string(displayFile.size() + 1));
+    }
+    emit objectAdded(QString::fromStdString(shape->getName()));
     displayFile.push_back(std::move(shape));
     update();
 }
+
+void GraphicsFrame::setSelectedObject(int index)
+{
+    if (index >= 0 && index < displayFile.size())
+    {
+        m_selectedObjectIndex = index;
+    }else
+    {
+        m_selectedObjectIndex = -1;
+    }
+    update();
+}
+
+void GraphicsFrame::translateSelected(double x, double y, double z) const
+{
+    const auto object = &displayFile[m_selectedObjectIndex];
+    object->get()->translate(x,y,z);
+}
+
+void GraphicsFrame::scaleSelected(const double x, const double y,const double z) const
+{
+    const auto object= &displayFile[m_selectedObjectIndex];
+    const auto center = object->get()->getCenter();
+    object->get()->scale(x,y,z, center);
+}
+
+void GraphicsFrame::rotateSelected(double angle, char axis)
+{
+
+}
+
 
 void GraphicsFrame::resizeEvent(QResizeEvent *event)
 {
@@ -86,6 +121,7 @@ void GraphicsFrame::keyPressEvent(QKeyEvent *event)
             QFrame::keyPressEvent(event);
             return;
     }
+    update();
 }
 
 void GraphicsFrame::mousePressEvent(QMouseEvent *event)

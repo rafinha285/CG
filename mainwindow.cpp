@@ -27,6 +27,31 @@ MainWindow::MainWindow(QWidget *parent)
     }
     connect(ui->actionImport, &QAction::triggered, this, &MainWindow::handleImport);
 
+    connect(ui->translationButton, &QPushButton::clicked, this, [=]()
+    {
+        double x = ui->xTranslationValue->value();
+        double y = ui->yTranslationValue->value();
+        double z = ui->zTranslationValue->value();
+
+        graphicsFrame->translateSelected(x,y,z);
+    });
+
+    connect(ui->scaleButton, &QPushButton::clicked, this, [=]()
+    {
+        double x = ui->xScaleValue->value();
+        double y = ui->yScaleValue->value();
+        double z = ui->zScaleValue->value();
+        graphicsFrame->scaleSelected(x,y,z);
+    });
+
+    connect(graphicsFrame, &GraphicsFrame::objectAdded, this, [=](const QString &name)
+    {
+        ui->mainObjectList->addItem(name);
+    });
+
+    connect(ui->mainObjectList, &QListWidget::currentRowChanged,
+        graphicsFrame, &GraphicsFrame::setSelectedObject);
+
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::handleExit);
 }
 
@@ -51,11 +76,17 @@ void MainWindow::handleImport()
     ObjLoader::translateValues(&in, graphicsFrame);
 
     file.close();
-
-
 }
+
+
+void MainWindow::handleTranslate()
+{
+    // GraphicsFrame::
+}
+
 
 MainWindow::~MainWindow()
 {
+
     delete ui;
 }

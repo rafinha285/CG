@@ -71,6 +71,26 @@ public:
         return result;
     }
 
+    static Matrix3x3 createRotationInCenterMatrix(const double angleDegrees, const Vector2D center)
+    {
+        Matrix3x3 result;
+        const double angleRad = angleDegrees * (M_PI / 180.0);
+        const double c = std::cos(angleRad);
+        const double s = std::sin(angleRad);
+
+        const double tx = center.x();
+        const double ty = center.y();
+
+        result.m[0][0] = c;
+        result.m[0][1] = -s;
+        result.m[0][2] = tx*(1-c)+ty*s;
+        result.m[1][0] = s;
+        result.m[1][1] = c;
+        result.m[1][2] = ty*(1-c)*tx*s;
+
+        return result;
+    }
+
     static Matrix3x3 createRotationMatrix(const double angleDegrees)
     {
         Matrix3x3 rotMatrix;
@@ -108,10 +128,24 @@ public:
         scaleMatrix.m[1][1] = sy;
         return scaleMatrix;
     }
+
+    static Matrix3x3 createScaleInCenterMatrix(const double sx, const double sy, const Vector2D center)
+    {
+        Matrix3x3 scaleMatrix;
+
+        scaleMatrix.m[0][0] = sx;
+        scaleMatrix.m[1][1] = sy;
+        scaleMatrix.m[0][2] = center.x() * (1-sx);
+        scaleMatrix.m[1][2] = center.y() * (1-sy);
+
+
+        return scaleMatrix;
+    }
+
     static Matrix3x3 createViewportMatrix(const Window& window, const Viewport& viewport)
     {
-        const double tx = -window.min.m_coords[0];
-        const double ty = -window.min.m_coords[1];
+        const double tx = -window.min.x();
+        const double ty = -window.min.y();
 
         const Matrix3x3 T1 = createTranslationMatrix(tx,ty);
 

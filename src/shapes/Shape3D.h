@@ -27,17 +27,22 @@ public:
     }
 
     virtual void translate(double tx, double ty, double tz){}
-    virtual void scale(double sx, double sy, double sz){}
+    virtual void scale(double sx, double sy, double sz, const Vector3D& center = Vector3D(0,0,0)){}
     virtual void rotateX(double angle, const Vector3D& center){}
     virtual void rotateY(double angle, const Vector3D& center){}
     virtual void rotateZ(double angle, const Vector3D& center){}
+    virtual Vector3D getCenter(){}
 
     void setColor(const Color color)
     {
         this->color = color;
     }
 
+    void setName(const std::string& n) { m_name = n; }
+    std::string getName() const { return m_name; }
+
 protected:
+    std::string m_name = "Objeto sem nome";
     virtual void drawTransformed(
         QPainter& painter,
         const Matrix4x4& finalTransform,

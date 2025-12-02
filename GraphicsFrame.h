@@ -21,6 +21,14 @@ class GraphicsFrame : public QFrame
         explicit GraphicsFrame(QWidget *parent = nullptr);
         void addShape(std::unique_ptr<::Shape3D> shape);
         double speed = 10;
+        void setSelectedObject(int index);
+
+        void translateSelected(double x, double y, double z) const;
+        void rotateSelected(double angle, char axis);
+        void scaleSelected(double x, double y, double z) const;
+
+    signals:
+        void objectAdded(const QString &name);
 
     protected:
         void paintEvent(QPaintEvent *event) override;
@@ -33,6 +41,7 @@ class GraphicsFrame : public QFrame
     private:
         bool m_isRightMouseDown;
         QPoint m_lastMousePos;
+        int m_selectedObjectIndex = -1;
 
         std::vector<std::unique_ptr<::Shape3D>> displayFile;
 };
