@@ -30,45 +30,28 @@ public:
 
     void translate(const double x, const double y, const double z) override
     {
-        for (Line3D& line : this->lines)
-        {
-            line.translate(x,y,z);
-        }
+        for (Line3D& line : this->lines) line.translate(x,y,z);
     }
 
     void scale(const double sx, const double sy,const double sz, const Vector3D& center) override
     {
-        for (Line3D& line : this->lines)
-        {
-            line.scale(sx,sy,sz, center);
-        }
+        for (Line3D& line : this->lines) line.scale(sx,sy,sz, center);
     };
 
-    void rotateX(double angle)
+    void rotateX(double angle, const Vector3D& center) override
     {
-        Vector3D center = this->getCenter();
-        for (Line3D& line : this->lines)
-        {
-            line.rotateX(angle, center);
-        }
+        // Vector3D center = this->getCenter();
+        for (Line3D& line : this->lines) line.rotateX(angle, center);
     }
 
-    void rotateY(double angle)
+    void rotateY(double angle, const Vector3D& center) override
     {
-        Vector3D center = this->getCenter();
-        for (Line3D& line : this->lines)
-        {
-            line.rotateY(angle, center);
-        }
+        for (Line3D& line : this->lines) line.rotateY(angle, center);
     }
 
-    void rotateZ(double angle)
+    void rotateZ(double angle, const Vector3D& center) override
     {
-        Vector3D center = this->getCenter();
-        for (Line3D& line : this->lines)
-        {
-            line.rotateZ(angle, center);
-        }
+        for (Line3D& line : this->lines) line.rotateZ(angle, center);
     };
 
 
@@ -93,6 +76,15 @@ public:
         const double avgY = sumY / lines.size();
         const double avgZ = sumZ / lines.size();
         return Vector3D(avgX, avgY, avgZ);
+    }
+
+    void updateBounds(double& minX, double& maxX,
+                      double& minY, double& maxY,
+                      double& minZ, double& maxZ) const override
+    {
+        for (const Line3D& line : lines) {
+            line.updateBounds(minX, maxX, minY, maxY, minZ, maxZ);
+        }
     }
 
     void serColor(Color color)

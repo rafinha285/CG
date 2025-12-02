@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
     connect(ui->actionImport, &QAction::triggered, this, &MainWindow::handleImport);
 
+    //translate button
     connect(ui->translationButton, &QPushButton::clicked, this, [=]()
     {
         double x = ui->xTranslationValue->value();
@@ -36,13 +37,83 @@ MainWindow::MainWindow(QWidget *parent)
         graphicsFrame->translateSelected(x,y,z);
     });
 
+    //scale button
     connect(ui->scaleButton, &QPushButton::clicked, this, [=]()
     {
         double x = ui->xScaleValue->value();
         double y = ui->yScaleValue->value();
         double z = ui->zScaleValue->value();
         graphicsFrame->scaleSelected(x,y,z);
+        ui->xScaleValue->setValue(1);
+        ui->yScaleValue->setValue(1);
+        ui->zScaleValue->setValue(1);
     });
+
+    //rotate button
+    connect(ui->rotateButton, &QPushButton::clicked, this, [=]()
+    {
+        double angX = ui->xRotationValue->value();
+        double angY = ui->yRotationValue->value();
+        double angZ = ui->zRotationValue->value();
+
+        if (angX != 0.0)
+        {
+            graphicsFrame->rotateSelected(angX, 'X');
+        }
+
+        if (angY != 0.0)
+        {
+            graphicsFrame->rotateSelected(angY, 'Y');
+        }
+        if (angZ != 0.0)
+        {
+            graphicsFrame->rotateSelected(angZ, 'Z');
+        }
+    });
+
+    //reset camera
+    if (ui->resetCameraButton) {
+        connect(ui->resetCameraButton, &QPushButton::clicked, this, [=]()
+        {
+            graphicsFrame->resetCamera();
+        });
+    }
+
+    // delete button
+    connect(ui->deleteButton, &QPushButton::clicked, this, [=]()
+    {
+        int currentRow = ui->mainObjectList->currentRow();
+        if (currentRow >= 0)
+        {
+            graphicsFrame->deleteSelected();
+            ui->mainObjectList->takeItem(currentRow);
+        }
+    });
+
+    connect(ui->perspectiveRadioButton, &QRadioButton::toggled, this, [=](bool checked)
+    {
+        if (checked)
+        {
+            graphicsFrame->setProjection(true);
+        }
+    });
+
+    connect(ui->orthogonalRadioButton, &QRadioButton::toggled, this, [=](bool checked)
+    {
+        if (checked)
+        {
+            graphicsFrame->setProjection(false);
+        }
+    });
+
+    ui->perspectiveRadioButton->setChecked(true);
+
+    connect(ui->cameraSpeedValue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [=](double value)
+    {
+        graphicsFrame->speed = value;
+    });
+
+    ui->cameraSpeedValue->setValue(graphicsFrame->speed);
 
     connect(graphicsFrame, &GraphicsFrame::objectAdded, this, [=](const QString &name)
     {
@@ -62,7 +133,7 @@ void MainWindow::handleExit()
 
 void MainWindow::handleImport()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
+    const QString fileName = QFileDialog::getOpenFileName(this,
         tr("Importar arquivo"), QDir::homePath(), tr("Todos os Arquivos(*, *)"));
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -73,17 +144,14 @@ void MainWindow::handleImport()
     }
     QTextStream in(&file);
 
-    ObjLoader::translateValues(&in, graphicsFrame);
+    const QFileInfo fileInfo(fileName);
+
+    const std::string objectName = fileInfo.baseName().toStdString();
+
+    ObjLoader::translateValues(&in, graphicsFrame, objectName);
 
     file.close();
 }
-
-
-void MainWindow::handleTranslate()
-{
-    // GraphicsFrame::
-}
-
 
 MainWindow::~MainWindow()
 {

@@ -28,7 +28,6 @@ public:
 
 private slots:
     void handleImport();
-    void handleTranslate();
     void handleExit();
 
 private:

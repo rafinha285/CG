@@ -103,6 +103,24 @@ public:
         return result;
     }
 
+    static Matrix4x4 createRotationX(const double angle, const Vector3D& center)
+    {
+        Matrix4x4 result;
+        const double rad = angle * M_PI / 180.0;
+        const double c = std::cos(rad);
+        const double s = std::sin(rad);
+
+        result.m[1][1] = c;
+        result.m[1][2] = -s;
+        result.m[2][1] = s;
+        result.m[2][2] = c;
+
+        result.m[1][3] = center.y() * (1 - c) + center.z() * s;
+        result.m[2][3] = center.z() * (1 - c) - center.y() * s;
+
+        return result;
+    }
+
     static Matrix4x4 createRotationZ(double angle)
     {
         Matrix4x4 result;
@@ -112,6 +130,22 @@ public:
         result.m[1][1] = c;
         result.m[0][1] = s;
         result.m[1][0] = -s;
+        return result;
+    }
+    static Matrix4x4 createRotationZ(double angle, const Vector3D& center)
+    {
+        Matrix4x4 result;
+        const double rad = angle * M_PI / 180.0;
+        const double c = std::cos(rad);
+        const double s = std::sin(rad);
+
+        result.m[0][0] = c;
+        result.m[0][1] = -s;
+        result.m[1][0] = s;
+        result.m[1][1] = c;
+
+        result.m[0][3] = center.x() * (1 - c) + center.y() * s;
+        result.m[1][3] = center.y() * (1 - c) - center.x() * s;
         return result;
     }
 
@@ -124,6 +158,23 @@ public:
         result.m[2][0] = s;
         result.m[0][2] = -s;
         result.m[2][2] = c;
+        return result;
+    }
+
+    static Matrix4x4 createRotationY(double angle,const Vector3D& center)
+    {
+        Matrix4x4 result;
+        const double rad = angle * M_PI / 180.0;
+        const double c = std::cos(rad);
+        const double s = std::sin(rad);
+
+        result.m[0][0] = c;
+        result.m[0][2] = -s;
+        result.m[2][0] = s;
+        result.m[2][2] = c;
+
+        result.m[0][3] = center.x() * (1 - c) + center.z() * s;
+        result.m[2][3] = center.z() * (1 - c) - center.x() * s;
         return result;
     }
 

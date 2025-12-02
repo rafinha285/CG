@@ -29,14 +29,33 @@ public:
     void translate(const double x, const double y, const double z) override
     {
         Matrix4x4 transMatrix = Matrix4x4::createTranslation(x, y, z);
-        this->vector = transMatrix * this->vector;
+        this->vector *= transMatrix;
     }
 
     void scale(double sx, double sy, double sz, const Vector3D& center) override
     {
         Matrix4x4 scaleMatrix = Matrix4x4::createScale(sx, sy, sz, center);
-        this->vector = scaleMatrix * this->vector;
+        this->vector *= scaleMatrix;
     };
+
+    void rotateX(double angle, const Vector3D& center) override
+    {
+        Matrix4x4 rotateMatrix = Matrix4x4::createRotationX(angle, center);
+        this->vector *= rotateMatrix;
+    };
+
+    void rotateY(double angle, const Vector3D& center) override
+    {
+        Matrix4x4 rotateMatrix = Matrix4x4::createRotationY(angle, center);
+        this->vector *= rotateMatrix;
+    };
+
+    void rotateZ(double angle, const Vector3D& center) override
+    {
+        Matrix4x4 rotateMatrix = Matrix4x4::createRotationZ(angle, center);
+        this->vector *= rotateMatrix;
+    };
+
 
     Vector3D getCenter() override
     {
@@ -67,6 +86,20 @@ public:
 
         // 3. Chamada com os tipos 2D
         point.draw(painter, viewportTransform2D, window2D);
+    }
+
+    void updateBounds(double& minX, double& maxX,
+                      double& minY, double& maxY,
+                      double& minZ, double& maxZ) const override
+    {
+        if (vector.x() < minX) minX = vector.x();
+        if (vector.x() > maxX) maxX = vector.x();
+
+        if (vector.y() < minY) minY = vector.y();
+        if (vector.y() > maxY) maxY = vector.y();
+
+        if (vector.z() < minZ) minZ = vector.z();
+        if (vector.z() > maxZ) maxZ = vector.z();
     }
 };
 

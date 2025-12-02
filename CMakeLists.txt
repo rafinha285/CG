@@ -58,7 +58,8 @@ set(PROJECT_SOURCES
         # 6. ObjReader
         src/objreader/ObjLoader.h
         src/objreader/ObjLoader.cpp
-        src/Camera.h # Não se esqueça do .cpp!
+        src/Camera.h
+        src/vector/Vector3D.cpp # Não se esqueça do .cpp!
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -99,6 +99,26 @@ public:
         m_phi += dPhi;
         updateEyeFromAngles();
     }
+    void rotateAroundSelf(double dTheta, double dPhi) {
+        Vector3D currentEye = m_cop;
+
+        m_theta += dTheta;
+        m_phi += dPhi;
+
+        if (m_phi > 89.0 * M_PI / 180.0) m_phi = 89.0 * M_PI / 180.0;
+        if (m_phi < -89.0 * M_PI / 180.0) m_phi = -89.0 * M_PI / 180.0;
+
+        double y = m_radius * std::sin(m_phi);
+        double r_xz = m_radius * std::cos(m_phi);
+        double x = r_xz * std::sin(m_theta);
+        double z = r_xz * std::cos(m_theta);
+
+        Vector3D offset(x, y, z);
+
+        m_vrp = currentEye - offset;
+
+        updateEyeFromAngles();
+    }
 
     void updateAspect(double width, double height) {
         if (height == 0) height = 1;
@@ -136,6 +156,17 @@ public:
 
         updateEyeFromAngles();
     }
+
+    // void reset()
+    // {
+    //     m_vrp = Vector3D(0, 0, 0);
+    //     m_radius = 600;
+    //     m_theta = 0.0;
+    //     m_phi = M_PI / 6;
+    //     m_orthoWidth = m_radius;
+    //
+    //     updateEyeFromAngles();
+    // }
 };
 
 #endif //CG_CAMERA_H

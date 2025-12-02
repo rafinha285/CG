@@ -31,6 +31,10 @@ public:
     virtual void rotateX(double angle, const Vector3D& center){}
     virtual void rotateY(double angle, const Vector3D& center){}
     virtual void rotateZ(double angle, const Vector3D& center){}
+    virtual void updateBounds(double& minX, double& maxX,
+                                  double& minY, double& maxY,
+                                  double& minZ, double& maxZ) const {}
+
     virtual Vector3D getCenter(){}
 
     void setColor(const Color color)

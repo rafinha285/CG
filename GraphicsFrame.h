@@ -23,9 +23,15 @@ class GraphicsFrame : public QFrame
         double speed = 10;
         void setSelectedObject(int index);
 
-        void translateSelected(double x, double y, double z) const;
+        void translateSelected(double x, double y, double z);
         void rotateSelected(double angle, char axis);
-        void scaleSelected(double x, double y, double z) const;
+        void scaleSelected(double x, double y, double z);
+
+        void setProjection(bool projection);
+
+        void deleteSelected();
+
+        void resetCamera();
 
     signals:
         void objectAdded(const QString &name);
@@ -39,7 +45,9 @@ class GraphicsFrame : public QFrame
         void mouseReleaseEvent(QMouseEvent *event) override;
         void wheelEvent(QWheelEvent *event) override;
     private:
+    Vector3D getAverageCenter() const;
         bool m_isRightMouseDown;
+        bool m_isMiddleMouseDown;
         QPoint m_lastMousePos;
         int m_selectedObjectIndex = -1;
 

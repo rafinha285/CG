@@ -79,6 +79,14 @@ public:
         return calculateMiddle();
     }
 
+    void updateBounds(double& minX, double& maxX,
+                      double& minY, double& maxY,
+                      double& minZ, double& maxZ) const override
+    {
+        p1.updateBounds(minX, maxX, minY, maxY, minZ, maxZ);
+        p2.updateBounds(minX, maxX, minY, maxY, minZ, maxZ);
+    }
+
 protected:
 
     void drawTransformed(
@@ -88,34 +96,70 @@ protected:
         Window3D* window
     ) const override
     {
-        // 1. Transformação 3D (Coordenadas de Cena -> Coordenadas de Clipping/Projeção)
-        auto p1Transformed = finalTransform * this->p1.vector;
-        auto p2Transformed = finalTransform * this->p2.vector;
+        Vector3D v1 = finalTransform * this->p1.vector;
+        Vector3D v2 = finalTransform * this->p2.vector;
 
-        // Aplicação da Divisão por W (Perspectiva) - É fundamental antes de ir para 2D
-        double w1 = p1Transformed.w();
-        double w2 = p2Transformed.w();
+        const double wMin = 0.1;
 
-        if (w1 == 0.0 || w2 == 0.0) return; // Evita divisão por zero
+        bool v1_visible = v1.w() > wMin;
+        bool v2_visible = v2.w() > wMin;
 
-        auto p1_screen = Vector2D(p1Transformed.x() / w1, p1Transformed.y() / w1);
-        auto p2_screen = Vector2D(p2Transformed.x() / w2, p2Transformed.y() / w2);
+        if (!v1_visible && !v2_visible) return;
 
-        auto p12D = Point(p1_screen.x(), p1_screen.y(), this->color);
-        auto p22D = Point(p2_screen.x(), p2_screen.y(), this->color);
-        auto line = Line(p12D, p22D, this->color);
+        if (v1_visible != v2_visible)
+        {
+            double t = (wMin - v1.w()) / (v2.w() - v1.w());
 
-        // 3. Conversão das Matrizes e Windows para o 2D (Clipping)
+            double newX = v1.x() + (v2.x() - v1.x()) * t;
+            double newY = v1.y() + (v2.y() - v1.y()) * t;
+            double newZ = v1.z() + (v2.z() - v1.z()) * t;
+            double newW = wMin;
 
-        // --- CORREÇÃO AQUI: Passe a matrix viewportTransform para o construtor ---
-        const Matrix3x3 viewportTransform2D = Matrix3x3(viewportTransform);
+            if (v1_visible)
+            {
+                v2 = v2 = Vector3D(newX, newY, newZ);;
+            }else
+            {
+                v1 = Vector3D(newX, newY, newZ);
+            }
 
-        auto* window2D = static_cast<Window*>(window);
+            if (v1_visible)
+            {
+                auto p1_screen = Vector2D(v1.x() / v1.w(), v1.y() / v1.w());
+                auto p2_screen = Vector2D(newX / newW, newY / newW);
 
-        // 4. Chamada da rotina 2D (Clipping + Desenho)
-        line.clipAndDraw(painter, viewportTransform2D, window2D);
+                drawLine2D(painter, p1_screen, p2_screen, color, viewportTransform, window);
+                return;
+            }else
+            {
+                auto p1_screen = Vector2D(newX / newW, newY / newW);
+                auto p2_screen = Vector2D(v2.x() / v2.w(), v2.y() / v2.w());
+
+                drawLine2D(painter, p1_screen, p2_screen, color, viewportTransform, window);
+                return;
+            }
+
+        }
+
+        double w1_final = v1.w();
+        double w2_final = v2.w();
+
+        auto p1_screen = Vector2D(v1.x() / w1_final, v1.y() / w1_final);
+        auto p2_screen = Vector2D(v2.x() / w2_final, v2.y() / w2_final);
+
+        drawLine2D(painter, p1_screen, p2_screen, color, viewportTransform, window);
     };
 
+    void drawLine2D(QPainter& painter, Vector2D p1_scr, Vector2D p2_scr, Color c, const Matrix4x4& vp, Window3D* win) const
+    {
+        auto p12D = Point(p1_scr.x(), p1_scr.y(), c);
+        auto p22D = Point(p2_scr.x(), p2_scr.y(), c);
+        auto line = Line(p12D, p22D, c);
+
+        const Matrix3x3 viewportTransform2D = Matrix3x3(vp);
+        auto* window2D = static_cast<Window*>(win);
+        line.clipAndDraw(painter, viewportTransform2D, window2D);
+    }
 private:
     Point3D p1, p2;
 };

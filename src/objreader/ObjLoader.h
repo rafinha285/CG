@@ -21,7 +21,7 @@ private:
     static std::vector<Point3D> points;
     static std::vector<Polygon3D> polygons;
 public:
-    static void translateValues(QTextStream* textStream, GraphicsFrame* frame);
+    static void translateValues(QTextStream* textStream, GraphicsFrame* frame, const std::string& fileName);
 };
 
 

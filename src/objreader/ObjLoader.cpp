@@ -9,7 +9,7 @@
 std::vector<Point3D> ObjLoader::points;
 std::vector<Polygon3D> ObjLoader::polygons;
 
-void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame)
+void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame, const std::string& fileName)
 {
     // points.clear();
     // polygons.clear();
@@ -17,7 +17,7 @@ void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame)
     std::vector<Point3D> tempPoints;
 
     auto wholeModel = std::make_unique<Polygon3D>();
-    wholeModel->setName("Modelo Importado");
+    wholeModel->setName(fileName);
 
     while (!textStream->atEnd())
     {
@@ -152,7 +152,6 @@ void ObjLoader::translateValues(QTextStream* textStream, GraphicsFrame* frame)
     }
 
     if (!wholeModel->getCenter().x() && tempPoints.empty()) {
-        // Verifica se o modelo está vazio antes de adicionar
     } else {
         frame->addShape(std::move(wholeModel));
     }

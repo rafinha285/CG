@@ -5,6 +5,8 @@
 #ifndef CG_VECTOR3D_H
 #define CG_VECTOR3D_H
 
+#include <cmath>
+
 class Matrix4x4;
 
 class Vector3D
@@ -72,6 +74,10 @@ public:
             m_coords[2] / scalar
         );
     }
+
+    Vector3D& operator*=(const Matrix4x4& m);
+
+    Vector3D& operator+=(const Vector3D& other);
 
     static Vector3D cross(const Vector3D& v1, const Vector3D& v2) {
         return Vector3D(

@@ -16,6 +16,7 @@ GraphicsFrame::GraphicsFrame(QWidget *parent)
     m_camera(800,600)
 {
     m_isRightMouseDown = false;
+    m_isMiddleMouseDown = false;
     setFrameShape(QFrame::StyledPanel);
 
     setFocusPolicy(Qt::StrongFocus);
@@ -44,24 +45,135 @@ void GraphicsFrame::setSelectedObject(int index)
     update();
 }
 
-void GraphicsFrame::translateSelected(double x, double y, double z) const
+void GraphicsFrame::deleteSelected()
 {
-    const auto object = &displayFile[m_selectedObjectIndex];
-    object->get()->translate(x,y,z);
+    if (m_selectedObjectIndex >= 0 && m_selectedObjectIndex < displayFile.size())
+    {
+        displayFile.erase(displayFile.begin() + m_selectedObjectIndex);
+
+        m_selectedObjectIndex = -1;
+
+        update();
+    }
 }
 
-void GraphicsFrame::scaleSelected(const double x, const double y,const double z) const
+
+void GraphicsFrame::translateSelected(double x, double y, double z)
 {
+    if (m_selectedObjectIndex <0)
+    {
+        return;
+    }
+    const auto object = &displayFile[m_selectedObjectIndex];
+    object->get()->translate(x,y,z);
+    update();
+}
+
+void GraphicsFrame::scaleSelected(const double x, const double y,const double z)
+{
+    if (m_selectedObjectIndex <0)
+    {
+        return;
+    }
     const auto object= &displayFile[m_selectedObjectIndex];
     const auto center = object->get()->getCenter();
     object->get()->scale(x,y,z, center);
+    update();
 }
 
 void GraphicsFrame::rotateSelected(double angle, char axis)
 {
+    if (m_selectedObjectIndex != -1 && m_selectedObjectIndex < displayFile.size()) {
 
+        Vector3D center = displayFile[m_selectedObjectIndex]->getCenter();
+
+        if (axis == 'X') {
+            displayFile[m_selectedObjectIndex]->rotateX(angle, center);
+        }
+        else if (axis == 'Y') {
+            displayFile[m_selectedObjectIndex]->rotateY(angle, center);
+        }
+        else if (axis == 'Z') {
+            displayFile[m_selectedObjectIndex]->rotateZ(angle, center);
+        }
+
+        update();
+    }
 }
 
+void GraphicsFrame::resetCamera()
+{
+    printf("Camera resetada");
+    if (displayFile.empty()) return;
+    double minX = std::numeric_limits<double>::max();
+    double maxX = std::numeric_limits<double>::lowest();
+    double minY = minX, maxY = maxX;
+    double minZ = minX, maxZ = maxX;
+
+    for (const auto& shape : displayFile) {
+        shape->updateBounds(minX, maxX, minY, maxY, minZ, maxZ);
+    }
+
+    double centerX = (minX + maxX) / 2;
+    double centerY = (minY + maxY) / 2;
+    double centerZ = (minZ + maxZ) / 2;
+
+    double sizeX = maxX - minX;
+    double sizeY = maxY - minY;
+    double sizeZ = maxZ - minZ;
+
+    double maxDimension = std::max({sizeX, sizeY, sizeZ});
+
+    if (maxDimension == 0) maxDimension = 100;
+
+    m_camera.m_vrp = Vector3D(centerX, centerY, centerZ);
+    m_camera.m_radius = maxDimension * 1.5;
+    m_camera.m_orthoWidth = m_camera.m_radius;
+
+    m_camera.m_theta = 0.0;
+    m_camera.m_phi = M_PI / 6.0;
+
+    m_camera.updateEyeFromAngles();
+    update();
+}
+
+void GraphicsFrame::setProjection(bool projection)
+{
+    if (projection)
+    {
+        m_camera.m_type = PERSPECTIVE;
+    }else
+    {
+        m_camera.m_type = ORTHOGRAPHIC;
+        double fovRad = m_camera.m_fov * M_PI / 180.0;
+        m_camera.m_orthoWidth = 2.0 * m_camera.m_radius * std::tan(fovRad / 2.0) * m_camera.m_aspect;
+    }
+    update();
+}
+
+
+Vector3D GraphicsFrame::getAverageCenter() const
+{
+    if (displayFile.empty()) {
+        return Vector3D(0, 0, 0);
+    }
+
+    double sumX = 0.0;
+    double sumY = 0.0;
+    double sumZ = 0.0;
+
+    for (const auto& object : displayFile)
+    {
+        Vector3D c = object->getCenter();
+        sumX += c.x();
+        sumY += c.y();
+        sumZ += c.z();
+    }
+
+    double count = static_cast<double>(displayFile.size());
+
+    return Vector3D(sumX / count, sumY / count, sumZ / count);
+}
 
 void GraphicsFrame::resizeEvent(QResizeEvent *event)
 {
@@ -131,6 +243,11 @@ void GraphicsFrame::mousePressEvent(QMouseEvent *event)
         m_isRightMouseDown = true;
         m_lastMousePos = event->pos();
         event->accept();
+    }else if (event->button() == Qt::MiddleButton)
+    {
+        m_isMiddleMouseDown = true;
+        m_lastMousePos = event->pos();
+        event->accept();
     }
 }
 
@@ -141,25 +258,33 @@ void GraphicsFrame::mouseReleaseEvent(QMouseEvent *event)
         m_isRightMouseDown = false;
         event->accept();
     }
+    else if (event->button() == Qt::MiddleButton)
+    {
+        m_isMiddleMouseDown = false;
+        event->accept();
+    }
 }
 
 void GraphicsFrame::mouseMoveEvent(QMouseEvent *event)
 {
+    QPoint currentPos = event->pos();
+    int dx = currentPos.x() - m_lastMousePos.x();
+    int dy = currentPos.y() - m_lastMousePos.y();
+
+    double sensitivity = 0.01;
     if (m_isRightMouseDown)
     {
-        QPoint currentPos = event->pos();
-        int dx = currentPos.x() - m_lastMousePos.x();
-        int dy = currentPos.y() - m_lastMousePos.y();
-
-        // Sensibilidade do mouse
-        double sensitivity = 0.01;
-
-        // Delegamos a rotação para a classe Camera
-        // Invertemos dx/dy conforme gosto pessoal (arrastar cenário vs mover camera)
-        m_camera.rotate(dx * sensitivity, dy * sensitivity);
+        m_camera.rotate(-dx * sensitivity, -dy * sensitivity);
 
         m_lastMousePos = currentPos;
-        update(); // Redesenha a tela
+        update();
+        event->accept();
+    }
+    else if (m_isMiddleMouseDown)
+    {
+        m_camera.rotateAroundSelf(-dx * sensitivity, dy * sensitivity);
+        m_lastMousePos = currentPos;
+        update();
         event->accept();
     }
 }
@@ -168,15 +293,11 @@ void GraphicsFrame::wheelEvent(QWheelEvent* event)
 {
     int delta = event->angleDelta().y();
 
-    // Define a velocidade do zoom
-    double zoomSpeed = 20.0;
-
-    // Delegamos o zoom para a classe Camera
-    // Se delta > 0 (roda pra frente), aproximamos (negativo no raio ou largura)
+    double currentZoomSpeed = this->speed * 2.0;
     if (delta > 0)
-        m_camera.zoom(-zoomSpeed);
+        m_camera.zoom(-currentZoomSpeed);
     else
-        m_camera.zoom(zoomSpeed);
+        m_camera.zoom(currentZoomSpeed);
 
     update(); // Redesenha a tela
     event->accept();
